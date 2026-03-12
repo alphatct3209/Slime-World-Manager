@@ -1,0 +1,37 @@
+{
+    net.minecraft.server.level.ServerLevel[] defaultWorlds = (net.minecraft.server.level.ServerLevel[]) com.grinderwolf.swm.clsm.ClassModifier.getDefaultWorlds();
+
+    if (defaultWorlds != null) {
+        System.out.println("Overriding default worlds");
+
+        net.minecraft.server.level.ServerLevel overworld = defaultWorlds[0];
+        net.minecraft.server.level.ServerLevel nether = defaultWorlds[1];
+        net.minecraft.server.level.ServerLevel end = defaultWorlds[2];
+
+        if (overworld != null) {
+            $0.levels.put(net.minecraft.world.level.Level.OVERWORLD, overworld);
+            $0.initializeScoreboard(overworld.getDataStorage());
+            org.spigotmc.SpigotConfig.disableStatSaving = true;
+            org.spigotmc.SpigotConfig.disableAdvancementSaving = true;
+        }
+
+        if ($0.isNetherEnabled() && nether != null) {
+            $0.levels.put(net.minecraft.world.level.Level.NETHER, nether);
+        }
+
+        if ($0.isEndEnabled() && end != null) {
+            $0.levels.put(net.minecraft.world.level.Level.END, end);
+        }
+
+        for (net.minecraft.server.level.ServerLevel world : $0.getAllLevels()) {
+            $0.loadSpawn(world.getChunkSource().chunkMap.progressListener, world);
+            $0.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldLoadEvent(world.getWorld()));
+        }
+
+        $0.server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.POSTWORLD);
+        $0.server.getPluginManager().callEvent(new org.bukkit.event.server.ServerLoadEvent(org.bukkit.event.server.ServerLoadEvent.LoadType.STARTUP));
+        $0.connection.acceptConnections();
+
+        return;
+    }
+}
