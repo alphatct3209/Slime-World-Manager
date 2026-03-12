@@ -177,8 +177,31 @@ public class SWMPlugin extends JavaPlugin implements SlimePlugin {
                 return new v1_14_R1SlimeNMS();
             case "v1_15_R1":
                 return new v1_15_R1SlimeNMS();
+            case "v1_21_R1":
+            case "v1_21_R2":
+            case "v1_21_R3":
+            case "v1_21_R4":
+            case "v1_21_R5":
+            case "v1_21_R6":
+            case "v1_21_R7":
+            case "v1_21_R8":
+                return loadV121NMSBridge();
             default:
+                // Try to handle unknown 1.21.x versions gracefully
+                if (nmsVersion.startsWith("v1_21_")) {
+                    Logging.warning("Unsupported 1.21.x version: " + nmsVersion + ". Attempting to use v1_21_R1 bridge.");
+                    return loadV121NMSBridge();
+                }
                 throw new InvalidVersionException(nmsVersion);
+        }
+    }
+
+    private SlimeNMS loadV121NMSBridge() throws InvalidVersionException {
+        try {
+            Class<?> nmsClass = Class.forName("com.grinderwolf.swm.nms.v1_21_R1.v1_21_R1SlimeNMS");
+            return (SlimeNMS) nmsClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new InvalidVersionException("v1_21_R1 (failed to load: " + e.getMessage() + ")");
         }
     }
 

@@ -1,0 +1,67 @@
+name: Build
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Download BuildTools
+      run: |
+        mkdir -p /tmp/buildtools
+        wget -O /tmp/buildtools/BuildTools.jar \
+          https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+    
+    - name: Build Spigot 1.21 with BuildTools
+      working-directory: /tmp/buildtools
+      run: |
+        java -jar BuildTools.jar --rev 1.21 --compile SPIGOT
+        mvn install:install-file \
+          -Dfile=spigot-1.21.jar \
+          -DgroupId=org.spigotmc \
+          -DartifactId=spigot \
+          -Dversion=1.21-R0.1-SNAPSHOT \
+          -Dpackaging=jar
+      
+    - name: Build legacy Spigot versions (for older modules)
+      run: |
+        # Download and install Spigot jars for older versions
+        wget -O /tmp/spigot-1.15.1.jar \
+          https://cdn.getbukkit.org/spigot/spigot-1.15.1.jar 2>/dev/null || \
+        java -jar /tmp/buildtools/BuildTools.jar --rev 1.15.1 --compile SPIGOT && \
+          mv /tmp/buildtools/spigot-1.15.1.jar /tmp/spigot-1.15.1.jar || true
+        if [ -f /tmp/spigot-1.15.1.jar ]; then
+          mvn install:install-file \
+            -Dfile=/tmp/spigot-1.15.1.jar \
+            -DgroupId=org.spigotmc \
+            -DartifactId=spigot \
+            -Dversion=1.15.1-R0.1-SNAPSHOT \
+            -Dpackaging=jar
+        fi
+    
+    - name: Build project
+      run: mvn package -DskipTests
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SlimeWorldManager
+        path: slimeworldmanager-plugin/target/slimeworldmanager-plugin-*.jar
+        if-no-files-found: warn

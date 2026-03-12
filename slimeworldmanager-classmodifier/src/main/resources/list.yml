@@ -1,3 +1,10 @@
+net/minecraft/server/level/ChunkMap:
+  - save(net.minecraft.world.level.chunk.ChunkAccess)@v1_21_R1/ChunkMap_saveChunk.txt
+  - scheduleChunkLoad(net.minecraft.world.level.ChunkPos)@v1_21_R1/ChunkMap_loadChunk.txt
+net/minecraft/server/MinecraftServer:
+  - loadLevel()@v1_21_R1/MinecraftServer_loadLevel.txt
+org/bukkit/craftbukkit/v1_21_R1/CraftServer:
+  - addWorld(org.bukkit.World)@v1_21_R1/CraftServer_addWorld.txt
 net/minecraft/server/v1_15_R1/PlayerChunkMap:
   - saveChunk(net.minecraft.server.v1_15_R1.IChunkAccess)@v1_15_R1/PlayerChunkMap_saveChunk.txt
   - f(net.minecraft.server.v1_15_R1.ChunkCoordIntPair)@v1_15_R1/PlayerChunkMap_loadChunk.txt
